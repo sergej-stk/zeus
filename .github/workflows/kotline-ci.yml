@@ -42,14 +42,17 @@ jobs:
           path: ~/.android
           key: ${{ runner.os }}-android-sdk
 
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
       - name: Build Debug APK
-        run: ./gradlew -p app/src assembleDebug
+        run: ./gradlew assembleDebug
 
       - name: Run Lint
-        run: ./gradlew -p app/src lint
+        run: ./gradlew lint
 
       - name: Run Unit Tests
-        run: ./gradlew -p app/src test
+        run: ./gradlew test
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
