@@ -1,0 +1,58 @@
+name: Android CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'app/src/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'app/src/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+
+      - name: Cache Android SDK
+        uses: actions/cache@v3
+        with:
+          path: ~/.android
+          key: ${{ runner.os }}-android-sdk
+
+      - name: Build Debug APK
+        run: ./gradlew -p app/src assembleDebug
+
+      - name: Run Lint
+        run: ./gradlew -p app/src lint
+
+      - name: Run Unit Tests
+        run: ./gradlew -p app/src test
+
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-debug.apk
+          path: app/src/build/outputs/apk/debug/app-debug.apk
